@@ -1,0 +1,51 @@
+version: "3"
+services:
+  zabbix_db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_USER_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+  zabbix_server:
+    image: zabbix/zabbix-server-mysql:${OS}-${VERSION}
+    environment:
+      - DB_SERVER_HOST=zabbix_db
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_USER_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - ZBX_DEBUGLEVEL=${LOG_LEVEL}
+    ports:
+      - "10051:10051"
+    links:
+      - zabbix_db
+  zabbix_web:
+    image: zabbix/zabbix-web-apache-mysql:${OS}-${VERSION}
+    environment:
+      - ZBX_SERVER_HOST=zabbix_server
+      - DB_SERVER_HOST=zabbix_db
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_USER_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - PHP_TZ=${TIME_ZONE}
+    ports:
+      - ${HTTP_PORT}:80
+    links:
+      - zabbix_server
+      - zabbix_db
+  zabbix_agent:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    privileged: true
+    ports:
+      - "80:80"
+      - "10061:10061"
+    environment:
+      - ZBX_SERVER_HOST=zabbix_server
+    volumes:
+      - ./html:/var/www/html
+    links:
+      - zabbix_server
