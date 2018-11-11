@@ -18,7 +18,7 @@ ZBX_REQ_DATA="$1"
 ZBX_REQ_DATA_URL="$2"
 
 # Nginx defaults
-NGINX_STATUS_DEFAULT_URL="http://localhost:10061/php-fpm_status"
+NGINX_STATUS_DEFAULT_URL="http://localhost:10061/phpfpm_status"
 WGET_BIN="/usr/bin/wget"
 
 #

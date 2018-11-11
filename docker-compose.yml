@@ -39,6 +39,8 @@ services:
     build:
       context: .
       dockerfile: ./docker/Dockerfile
+    # command: >
+    #   bash -c "rc-service nginx restart && rc-service /etc/init.d/php-fpm7 restart"
     privileged: true
     ports:
       - "80:80"

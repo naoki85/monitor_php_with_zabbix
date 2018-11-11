@@ -1,1 +1,1 @@
-<?php for($i=0;$i < 1000; $i++) { echo 'hogehoge'; } ?>
+<?php for($i=0;$i < 1000000; $i++) { echo "index\n"; } ?>
