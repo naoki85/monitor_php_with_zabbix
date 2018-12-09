@@ -1,7 +1,7 @@
 FROM zabbix/zabbix-agent:alpine-3.4.14
 
 # Install Nginx and PHP
-RUN apk update && apk add openrc vim curl && \
+RUN apk update && apk add openrc vim curl tzdata && \
   sed -i 's/#rc_sys=""/rc_sys="lxc"/g' /etc/rc.conf && \
   echo 'rc_provide="loopback net"' >> /etc/rc.conf && \
   sed -i 's/^#\(rc_logger="YES"\)$/\1/' /etc/rc.conf && \
@@ -9,8 +9,11 @@ RUN apk update && apk add openrc vim curl && \
   sed -i 's/hostname $opts/# hostname $opts/g' /etc/init.d/hostname && \
   sed -i 's/mount -t tmpfs/# mount -t tmpfs/g' /lib/rc/sh/init.sh && \
   sed -i 's/cgroup_add_service /# cgroup_add_service /g' /lib/rc/sh/openrc-run.sh && \
-  mkdir /run/openrc && touch /run/openrc/softlevel
-RUN apk add nginx
+  mkdir /run/openrc && touch /run/openrc/softlevel && \
+  cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+  apk del tzdata && \
+  rm -rf /var/cache/apk/*
+RUN apk add --update nginx
 RUN apk add --update \
   --repository http://dl-cdn.alpinelinux.org/alpine/latest-stable/main \
   --repository http://dl-cdn.alpinelinux.org/alpine/latest-stable/community \
@@ -34,6 +37,3 @@ COPY ./docker/zabbix/php-fpm-check.sh /usr/local/zabbix-agent-ops/bin/php-fpm-ch
 RUN mkdir -p /var/log/php7 && touch /var/log/php7/www.error.log && chown nginx:nginx /var/log/php7/www.error.log
 
 RUN rc-status && rc-service nginx start && rc-service /etc/init.d/php-fpm7 start
-EXPOSE 80
-EXPOSE 10050
-
